@@ -1,38 +1,26 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
 const { result } = require('lodash');
+const { errorResponder, errorTypes } = require('../../../core/errors');
 
 /**
  * Get list of users
+ * @param {Number} number - Number of current page out of all the pages available
+ * @param {Number} size - Size of current page
  * @returns {Array}
  */
-async function getUsers() {
+async function getUsers(number, size) {
   const users = await usersRepository.getUsers();
 
-  const results = [];
-  for (let i = 0; i < users.length; i += 1) {
-    const user = users[i];
-    results.push({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
+  if (number > users.length / size) {
+    throw errorResponder(
+      errorTypes.UNPROCESSABLE_ENTITY,
+      'Exceeded the page limit'
+    );
   }
 
-  return results;
-}
-
-/**
- * Get list of users based on pagination
- * @param {integer} page_number - Number of page
- * @returns {Array}
- */
-async function getUsersPage(page_number) {
-  const page_size = 10;
-  const users = await usersRepository.getUsers();
-
-  const results = [page_size];
-  for (let i = 0; i < page_size; i += 1) {
+  const results = [size];
+  for (let i = (number - 1) * size; i < size + (number - 1) * size; i += 1) {
     const user = users[i];
     results.push({
       id: user.id,
@@ -42,15 +30,46 @@ async function getUsersPage(page_number) {
   }
 
   return {
-    page_number: 1,
-    page_size: 10,
-    count: 3,
-    total_pages: 1,
+    page_number: number,
+    page_size: size,
+    count: users.length,
+    total_pages: users.length / size,
     has_previous_page: false,
     has_next_page: false,
-    data: result,
+    data: results,
   };
 }
+
+// /**
+//  * Get list of users based on pagination
+//  * @param {integer} page_number - Number of page
+//  * @returns {Array}
+//  */
+// async function getUsersPage(number, size) {
+//   const page_number = number;
+//   const page_size = size;
+//   const users = await usersRepository.getUsers();
+
+//   const results = [page_size];
+//   for (let i = 0 + (page_number - 1) * 10; i < page_size; i += 1) {
+//     const user = users[i];
+//     results.push({
+//       id: user.id,
+//       name: user.name,
+//       email: user.email,
+//     });
+//   }
+
+//   return {
+//     page_number: number,
+//     page_size: size,
+//     count: 3,
+//     total_pages: 1,
+//     has_previous_page: false,
+//     has_next_page: false,
+//     data: result,
+//   };
+// }
 
 /**
  * Get user detail
@@ -194,7 +213,7 @@ async function changePassword(userId, password) {
 
 module.exports = {
   getUsers,
-  getUsersPage,
+  // getUsersPage,
   getUser,
   createUser,
   updateUser,

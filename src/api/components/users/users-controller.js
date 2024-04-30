@@ -10,28 +10,36 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  */
 async function getUsers(request, response, next) {
   try {
-    const users = await usersService.getUsers();
+    const number = parseInt(request.query.page_number);
+    const size = parseInt(request.query.page_size);
+
+    const users = await usersService.getUsers(number, size);
     return response.status(200).json(users);
   } catch (error) {
     return next(error);
   }
 }
 
-/**
- * Handle get list of users by pagination request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
-async function getUsersPage(request, response, next) {
-  try {
-    const users = await usersService.getUsersPage(request.params.page_number);
-    return response.status(200).json(users);
-  } catch (error) {
-    return next(error);
-  }
-}
+// /**
+//  * Handle get list of users by pagination request
+//  * @param {object} request - Express request object
+//  * @param {object} response - Express response object
+//  * @param {object} next - Express route middlewares
+//  * @returns {object} Response object or pass an error to the next route
+//  */
+// async function getUsersPage(request, response, next) {
+//   try {
+//     const users = await usersService.getUsersPage(request.params.page_number);
+
+//     if (!user) {
+//       throw errorResponder(errorTypes.UNPROCESSABLE_ENTITY, 'Unknown error');
+//     }
+
+//     return response.status(200).json(users);
+//   } catch (error) {
+//     return next(error);
+//   }
+// }
 
 /**
  * Handle get user detail request
@@ -207,7 +215,7 @@ async function changePassword(request, response, next) {
 
 module.exports = {
   getUsers,
-  getUsersPage,
+  // getUsersPage,
   getUser,
   createUser,
   updateUser,

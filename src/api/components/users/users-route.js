@@ -13,12 +13,12 @@ module.exports = (app) => {
   // Get list of users
   route.get('/', authenticationMiddleware, usersControllers.getUsers);
 
-  // Get list of users based on pagination (param: page_number)
-  route.get(
-    '/:page_number',
-    authenticationMiddleware,
-    usersControllers.getUsersPage
-  );
+  // // Get list of users based on pagination (param: page_number)
+  // route.get(
+  //   '/:page_number',
+  //   authenticationMiddleware,
+  //   usersControllers.getUsersPage
+  // );
 
   // Get list of users based on pagination (param: page_number, page_size)
   // route.get(

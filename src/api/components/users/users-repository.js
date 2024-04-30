@@ -4,13 +4,19 @@ const { User } = require('../../../models');
  * Get a list of users
  * @returns {Promise}
  */
-async function getUsers() {
+async function getUsers(number, size) {
   return User.find({});
 }
 
-async function getUsersPage(page_number) {
-  return User.find({});
-}
+// /**
+//  * Get a list of users with pagination
+//  * @param {Number} page_number - Number of page
+//  * @returns {Promise}
+//  */
+// async function getUsersPage(number, size) {
+//   return User.find({});
+// }
+
 /**
  * Get user detail
  * @param {string} id - User ID
