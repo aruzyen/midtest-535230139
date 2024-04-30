@@ -21,8 +21,6 @@ module.exports = {
         .required()
         .label('Password'),
       password_confirm: joi.string().required().label('Password confirmation'),
-      loginAttempts: joi.number().label('Login Attemps'),
-      lockedStatus: joi.boolean().label('Locked Status'),
     },
   },
 

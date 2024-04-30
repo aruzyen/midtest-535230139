@@ -5,6 +5,7 @@ const {
   errorHandler,
 } = require('../../../core/errors');
 const { attempt } = require('lodash');
+const { loginAttempts } = require('../../../models/users-schema');
 
 /**
  * Handle get list of users request
@@ -204,9 +205,10 @@ async function userLogin(request, response, next) {
     const email = request.body.email;
     const password = request.body.password;
 
-    await usersService.userLogin(email, password);
-
-    return response.status(200).json({ id });
+    const loginStatus = await usersService.userLogin(email, password);
+    return response.status(200).json({
+      loginStatus,
+    });
   } catch (error) {
     return next(error);
   }
