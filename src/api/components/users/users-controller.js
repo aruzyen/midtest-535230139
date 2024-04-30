@@ -10,8 +10,8 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  */
 async function getUsers(request, response, next) {
   try {
-    const number = parseInt(request.query.page_number);
-    const size = parseInt(request.query.page_size);
+    const number = parseInt(request.query.page_number) || null;
+    const size = parseInt(request.query.page_size) || null;
 
     const users = await usersService.getUsers(number, size);
     return response.status(200).json(users);

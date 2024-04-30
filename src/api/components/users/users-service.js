@@ -1,6 +1,6 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
-const { result } = require('lodash');
+const { result, ceil } = require('lodash');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
 /**
@@ -11,33 +11,70 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  */
 async function getUsers(number, size) {
   const users = await usersRepository.getUsers();
+  const results = [];
 
-  if (number > users.length / size) {
+  // Returns all the users information if there are no parameters taken
+  if (!number && !size) {
+    for (let i = 0; i < users.length; i += 1) {
+      const user = users[i];
+      results.push({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+    }
+    return results;
+  } else if (!number || !size) {
     throw errorResponder(
       errorTypes.UNPROCESSABLE_ENTITY,
-      'Exceeded the page limit'
+      `Page size or number are not initialized`
     );
-  }
+  } else {
+    const limit = ceil(users.length / size);
+    if (number > limit) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        `Exceeded the page limit`
+      );
+    }
 
-  const results = [size];
-  for (let i = (number - 1) * size; i < size + (number - 1) * size; i += 1) {
-    const user = users[i];
-    results.push({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    });
-  }
+    // A function to return boolean value if the current page have a previous page
+    function hasPrevPage(number, limit) {
+      return number > 1 && limit > 1;
+    }
 
-  return {
-    page_number: number,
-    page_size: size,
-    count: users.length,
-    total_pages: users.length / size,
-    has_previous_page: false,
-    has_next_page: false,
-    data: results,
-  };
+    // A function to return boolean value if the current page have a next page
+    function hasNextPage(number, limit) {
+      return true ? number < limit : number < limit + 1;
+    }
+
+    const shift = (number - 1) * size;
+    for (let i = shift; i < size + shift; i += 1) {
+      const user = users[i];
+
+      // Get out of the operation when the variable i exceeds the users length (null or NaN)
+      if (users[i] == null || users[i] == NaN) {
+        break;
+      }
+
+      // Push the users schema into the results[] array
+      results.push({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      });
+    }
+
+    return {
+      page_number: number,
+      page_size: size,
+      count: users.length,
+      total_pages: limit,
+      has_previous_page: hasPrevPage(number, limit),
+      has_next_page: hasNextPage(number, limit),
+      data: results,
+    };
+  }
 }
 
 /**
