@@ -18,6 +18,22 @@ async function getUsers(request, response, next) {
 }
 
 /**
+ * Handle get list of users by pagination request
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function getUsersPage(request, response, next) {
+  try {
+    const users = await usersService.getUsersPage(request.params.page_number);
+    return response.status(200).json(users);
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
  * Handle get user detail request
  * @param {object} request - Express request object
  * @param {object} response - Express response object
@@ -191,6 +207,7 @@ async function changePassword(request, response, next) {
 
 module.exports = {
   getUsers,
+  getUsersPage,
   getUser,
   createUser,
   updateUser,

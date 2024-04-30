@@ -1,5 +1,6 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
+const { result } = require('lodash');
 
 /**
  * Get list of users
@@ -19,6 +20,36 @@ async function getUsers() {
   }
 
   return results;
+}
+
+/**
+ * Get list of users based on pagination
+ * @param {integer} page_number - Number of page
+ * @returns {Array}
+ */
+async function getUsersPage(page_number) {
+  const page_size = 10;
+  const users = await usersRepository.getUsers();
+
+  const results = [page_size];
+  for (let i = 0; i < page_size; i += 1) {
+    const user = users[i];
+    results.push({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    });
+  }
+
+  return {
+    page_number: 1,
+    page_size: 10,
+    count: 3,
+    total_pages: 1,
+    has_previous_page: false,
+    has_next_page: false,
+    data: result,
+  };
 }
 
 /**
@@ -163,6 +194,7 @@ async function changePassword(userId, password) {
 
 module.exports = {
   getUsers,
+  getUsersPage,
   getUser,
   createUser,
   updateUser,

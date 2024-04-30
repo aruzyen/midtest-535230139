@@ -8,6 +8,9 @@ async function getUsers() {
   return User.find({});
 }
 
+async function getUsersPage(page_number) {
+  return User.find({});
+}
 /**
  * Get user detail
  * @param {string} id - User ID
