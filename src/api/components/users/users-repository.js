@@ -81,6 +81,10 @@ async function changePassword(id, password) {
   return User.updateOne({ _id: id }, { $set: { password } });
 }
 
+async function userLogin() {
+  return User.find({});
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -89,4 +93,5 @@ module.exports = {
   deleteUser,
   getUserByEmail,
   changePassword,
+  userLogin,
 };

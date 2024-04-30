@@ -1,5 +1,10 @@
 const usersService = require('./users-service');
-const { errorResponder, errorTypes } = require('../../../core/errors');
+const {
+  errorResponder,
+  errorTypes,
+  errorHandler,
+} = require('../../../core/errors');
+const { attempt } = require('lodash');
 
 /**
  * Handle get list of users request
@@ -194,12 +199,28 @@ async function changePassword(request, response, next) {
   }
 }
 
+async function userLogin() {
+  try {
+    const id = request.params.id;
+
+    const success = await userService.userLogin(id);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Wrong password. Try again.'
+      );
+    }
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
 module.exports = {
   getUsers,
-  // getUsersPage,
   getUser,
   createUser,
   updateUser,
   deleteUser,
   changePassword,
+  userLogin,
 };

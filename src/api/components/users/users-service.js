@@ -260,9 +260,31 @@ async function changePassword(userId, password) {
   return true;
 }
 
+async function userLogin() {
+  const user = await usersRepository.getUser(userId);
+
+  // Check if user not found
+  if (!user) {
+    return null;
+  }
+
+  try {
+    await usersRepository.userLogin();
+
+    if (!user) {
+      return (
+        'User ', user.email, ' gagal login. Attempt: ', usersController.attempts
+      );
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return null;
+  }
+}
+
 module.exports = {
   getUsers,
-  // getUsersPage,
   getUser,
   createUser,
   updateUser,
@@ -270,4 +292,5 @@ module.exports = {
   emailIsRegistered,
   checkPassword,
   changePassword,
+  userLogin,
 };

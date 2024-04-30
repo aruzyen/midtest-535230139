@@ -42,4 +42,11 @@ module.exports = (app) => {
     celebrate(usersValidator.changePassword),
     usersControllers.changePassword
   );
+
+  // Login
+  route.post(
+    '/login/:id',
+    authenticationMiddleware,
+    usersControllers.userLogin
+  );
 };
