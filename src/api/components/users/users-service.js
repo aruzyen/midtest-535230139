@@ -40,37 +40,6 @@ async function getUsers(number, size) {
   };
 }
 
-// /**
-//  * Get list of users based on pagination
-//  * @param {integer} page_number - Number of page
-//  * @returns {Array}
-//  */
-// async function getUsersPage(number, size) {
-//   const page_number = number;
-//   const page_size = size;
-//   const users = await usersRepository.getUsers();
-
-//   const results = [page_size];
-//   for (let i = 0 + (page_number - 1) * 10; i < page_size; i += 1) {
-//     const user = users[i];
-//     results.push({
-//       id: user.id,
-//       name: user.name,
-//       email: user.email,
-//     });
-//   }
-
-//   return {
-//     page_number: number,
-//     page_size: size,
-//     count: 3,
-//     total_pages: 1,
-//     has_previous_page: false,
-//     has_next_page: false,
-//     data: result,
-//   };
-// }
-
 /**
  * Get user detail
  * @param {string} id - User ID

@@ -8,15 +8,6 @@ async function getUsers(number, size) {
   return User.find({});
 }
 
-// /**
-//  * Get a list of users with pagination
-//  * @param {Number} page_number - Number of page
-//  * @returns {Promise}
-//  */
-// async function getUsersPage(number, size) {
-//   return User.find({});
-// }
-
 /**
  * Get user detail
  * @param {string} id - User ID
