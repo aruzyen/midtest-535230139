@@ -12,8 +12,10 @@ async function getUsers(request, response, next) {
   try {
     const number = parseInt(request.query.page_number) || null;
     const size = parseInt(request.query.page_size) || null;
+    const sort = request.query.sort;
+    const search = request.query.search;
 
-    const users = await usersService.getUsers(number, size);
+    const users = await usersService.getUsers(number, size, sort, search);
     return response.status(200).json(users);
   } catch (error) {
     return next(error);

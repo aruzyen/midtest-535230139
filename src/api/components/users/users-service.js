@@ -4,15 +4,41 @@ const { result, ceil } = require('lodash');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
 /**
+ * Sort the list of users
+ * @param {Object} users - The list of users
+ * @param {String} field - Field to be sorted
+ * @param {String} order - Order of sort (asc or desc)
+ */
+function sortUsers(users, field, order) {
+  return users.sort((a, b) => {
+    if (order == 'asc') {
+      return a[field] > b[field] ? 1 : -1;
+    } else if (order == 'desc') {
+      return a[field] < b[field] ? 1 : -1;
+    }
+    return 0;
+  });
+}
+
+/**
  * Get list of users
  * @param {Number} number - Number of current page out of all the pages available
  * @param {Number} size - Size of current page
+ * @param {Object} sort - Sort data of users by email or name (ascending by default)
+ * @param {Object} search - Search data of users by email or name
  * @returns {Array}
  */
-async function getUsers(number, size) {
-  const users = await usersRepository.getUsers();
+async function getUsers(number, size, sort, search) {
+  let users = await usersRepository.getUsers();
   const results = [];
 
+  console.log(sort);
+
+  if (sort) {
+    const [field, order] = sort.split(':'); // Split the parameters
+
+    users = sortUsers(users, field, order);
+  }
   // Returns all the users information if there are no parameters taken
   if (!number && !size) {
     for (let i = 0; i < users.length; i += 1) {
