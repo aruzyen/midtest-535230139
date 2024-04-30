@@ -44,9 +44,5 @@ module.exports = (app) => {
   );
 
   // Login
-  route.post(
-    '/login/:id',
-    authenticationMiddleware,
-    usersControllers.userLogin
-  );
+  route.post('/login/', authenticationMiddleware, usersControllers.userLogin);
 };

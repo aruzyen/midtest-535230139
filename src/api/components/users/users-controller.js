@@ -199,17 +199,13 @@ async function changePassword(request, response, next) {
   }
 }
 
-async function userLogin() {
+async function userLogin(request, response, next) {
   try {
-    const id = request.params.id;
+    const email = request.body.email;
+    const password = request.body.password;
 
-    const success = await userService.userLogin(id);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.INVALID_PASSWORD,
-        'Wrong password. Try again.'
-      );
-    }
+    await usersService.userLogin(email, password);
+
     return response.status(200).json({ id });
   } catch (error) {
     return next(error);

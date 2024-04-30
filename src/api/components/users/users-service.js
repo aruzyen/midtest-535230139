@@ -3,6 +3,9 @@ const { hashPassword, passwordMatched } = require('../../../utils/password');
 const { result, ceil } = require('lodash');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 
+const MAX_LOGIN_ATTEMPTS = 5; // Limits users login attempts to 5
+const LOCKED_LOGIN_DUR = 30 * 1000; // Sets the locked duration to 30 minutes
+
 /**
  * Sort the list of users
  * @param {Object} users - The list of users
@@ -260,26 +263,20 @@ async function changePassword(userId, password) {
   return true;
 }
 
-async function userLogin() {
-  const user = await usersRepository.getUser(userId);
+async function userLogin(email, password) {
+  const user = users[email];
 
-  // Check if user not found
+  // User not found
   if (!user) {
     return null;
   }
-
-  try {
-    await usersRepository.userLogin();
-
-    if (!user) {
-      return (
-        'User ', user.email, ' gagal login. Attempt: ', usersController.attempts
-      );
-    } else {
-      return false;
-    }
-  } catch (error) {
-    return null;
+  if (user.password === password) {
+    // Reset login attempts
+    user.loginAttempts = 0;
+    return true;
+  } else {
+    user.loginAttempts++;
+    return false;
   }
 }
 

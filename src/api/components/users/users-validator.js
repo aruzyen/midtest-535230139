@@ -1,5 +1,6 @@
 const joi = require('joi');
 const { joiPasswordExtendCore } = require('joi-password');
+const { loginAttempts } = require('../../../models/users-schema');
 const joiPassword = joi.extend(joiPasswordExtendCore);
 
 module.exports = {
@@ -20,6 +21,8 @@ module.exports = {
         .required()
         .label('Password'),
       password_confirm: joi.string().required().label('Password confirmation'),
+      loginAttempts: joi.number().label('Login Attemps'),
+      lockedStatus: joi.boolean().label('Locked Status'),
     },
   },
 
