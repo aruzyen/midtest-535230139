@@ -9,7 +9,8 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  * @param {String} field - Field to be sorted
  * @param {String} order - Order of sort (asc or desc)
  */
-function sortUsers(users, field, order) {
+function sortUsers(users, sort) {
+  const [field, order] = sort.split(':'); // Split the parameters
   return users.sort((a, b) => {
     if (order == 'asc') {
       return a[field] > b[field] ? 1 : -1;
@@ -20,6 +21,18 @@ function sortUsers(users, field, order) {
   });
 }
 
+/**
+ * Search something from the list of users
+ * @param {Object} users - The list of users
+ * @param {String} field - Field to be searched
+ * @param {String} key   - What to search in the field
+ */
+function searchUsers(users, search) {
+  const [field, key] = search.split(':'); // Split the parameters
+  return users.filter((user) =>
+    user[field].toLowerCase().includes(key.toLowerCase())
+  );
+}
 /**
  * Get list of users
  * @param {Number} number - Number of current page out of all the pages available
@@ -32,13 +45,14 @@ async function getUsers(number, size, sort, search) {
   let users = await usersRepository.getUsers();
   const results = [];
 
-  console.log(sort);
+  if (search) {
+    users = searchUsers(users, search); // Calling searchUsers() func
+  }
 
   if (sort) {
-    const [field, order] = sort.split(':'); // Split the parameters
-
-    users = sortUsers(users, field, order);
+    users = sortUsers(users, sort); // Calling sortUsers() func
   }
+
   // Returns all the users information if there are no parameters taken
   if (!number && !size) {
     for (let i = 0; i < users.length; i += 1) {
