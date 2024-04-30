@@ -45,13 +45,10 @@ async function getUsers(number, size, sort, search) {
   let users = await usersRepository.getUsers();
   const results = [];
 
-  if (search) {
-    users = searchUsers(users, search); // Calling searchUsers() func
-  }
-
-  if (sort) {
-    users = sortUsers(users, sort); // Calling sortUsers() func
-  }
+  // Using ternary operators to search and sort function
+  // (if search and/or sort are queried)
+  search && (users = searchUsers(users, search));
+  sort && (users = sortUsers(users, sort));
 
   // Returns all the users information if there are no parameters taken
   if (!number && !size) {
@@ -64,12 +61,18 @@ async function getUsers(number, size, sort, search) {
       });
     }
     return results;
-  } else if (!number || !size) {
+  }
+
+  // Throw error when one of the page_size or page_number is not queried
+  else if ((number && !size) || (!number && size)) {
     throw errorResponder(
       errorTypes.UNPROCESSABLE_ENTITY,
-      `Page size or number are not initialized`
+      `One of the: page size or page number are not initialized`
     );
-  } else {
+  }
+
+  // If the page_number and page_size are queried
+  else {
     const limit = ceil(users.length / size);
     if (number > limit) {
       throw errorResponder(
