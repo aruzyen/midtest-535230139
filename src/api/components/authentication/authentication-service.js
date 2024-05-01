@@ -2,6 +2,8 @@ const authenticationRepository = require('./authentication-repository');
 const usersRepository = require('../users/users-repository');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
+const { errorResponder, errorTypes } = require('../../../core/errors');
+const timestamp = new Date().toISOString();
 
 /**
  * Check username and password for login.
@@ -23,20 +25,53 @@ async function checkLoginCredentials(email, password) {
   // login attempt as successful when the `user` is found (by email) and
   // the password matches.
   if (user && passwordChecked) {
+    // Sets the user's login attempt to 0
+    await usersRepository.resetLoginAttempt(user.id);
+
     return {
       email: user.email,
       name: user.name,
       user_id: user.id,
       token: generateToken(user.email, user.id),
     };
+  } else if (user && !passwordChecked && user.loginAttempts == 5) {
+    await usersRepository.incrementLoginAttempt(user.id);
+    await usersRepository.setLockUserLogin(user.id);
+
+    console.log(
+      `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m gagal login. Attempt=${user.loginAttempts}. Limit reached.`
+    );
+
+    throw errorResponder(
+      errorTypes.FORBIDDEN,
+      'Too many failed login attempts.'
+    );
+  } else if (user && user.loginAttempts > 5) {
+    console.log(
+      `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m mencoba login, namun mendapat error 403 karena telah melebihi limit attempt.`
+    );
+    const remainingTime =
+      usersRepository.LOCKED_LOGIN_DURATION - user.lockedTime;
+
+    throw errorResponder(
+      errorTypes.FORBIDDEN,
+      `Due to many failed login attempts. Please wait for ${remainingTime} minutes.`
+    );
   } else if (user && !passwordChecked) {
-    const loginAttempt = await usersRepository.incrementLoginAttempt(user.id);
-    console.log('Login_Attempt:', loginAttempt);
-    console.log('Login Attempt ZZZ:', user.loginAttempt);
+    // Increment the user's login attempts value
+    const incremented = await usersRepository.incrementLoginAttempt(user.id);
+
+    if (incremented) {
+      console.log(
+        `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m gagal login. Attempt=${user.loginAttempts}`
+      );
+    }
+
     return {
       code: 999,
     };
   }
+
   return null;
 }
 
