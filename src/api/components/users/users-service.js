@@ -33,6 +33,7 @@ function searchUsers(users, search) {
     user[field].toLowerCase().includes(key.toLowerCase())
   );
 }
+
 /**
  * Get list of users
  * @param {Number} number - Number of current page out of all the pages available

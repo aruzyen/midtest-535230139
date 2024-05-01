@@ -15,6 +15,11 @@ const { toInteger } = require('lodash');
 async function checkLoginCredentials(email, password) {
   const user = await authenticationRepository.getUserByEmail(email);
 
+  // Immediately return null if user not detected to avoid errors
+  if (!user) {
+    return null;
+  }
+
   // These variables are used to count user's locked out from logging in time
   const currentTime = new Date().getTime();
   const remainingTime = toInteger((user.lockedUntil - currentTime) / 60 / 1000);
@@ -88,11 +93,10 @@ async function checkLoginCredentials(email, password) {
     incremented = await usersRepository.incrementLoginAttempt(user.id);
     myLogger.logFailLogin(email) ? incremented : 0;
 
-    return {
-      code: 999,
-      message: 'Wrong password or email',
-      attempt: user.loginAttempts + 1,
-    };
+    throw errorResponder(
+      errorTypes.INVALID_PASSWORD,
+      `Wrong password. Please try again (Attempts: ${user.loginAttempts + 1})`
+    );
   }
 
   return null;

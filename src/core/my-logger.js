@@ -73,7 +73,7 @@ async function logTimesOver(email) {
   const user = await authenticationRepository.getUserByEmail(email);
 
   console.log(
-    `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m bisa mencoba login kembali karena sudah lebih dari ${usersRepository.LOCKED_LOGIN_DURATION} menit sejak pengenaan limit. Attempt di-\x1b[3mreset\x1b[0m kembali ke 0.`
+    `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m bisa mencoba login kembali karena sudah lebih dari 30 menit sejak pengenaan limit. Attempt di-\x1b[3mreset\x1b[0m kembali ke 0.`
   );
 }
 module.exports = {

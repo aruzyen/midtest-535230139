@@ -21,7 +21,7 @@ async function login(request, response, next) {
     if (!loginSuccess) {
       throw errorResponder(
         errorTypes.INVALID_CREDENTIALS,
-        'Wrong email or password hehe'
+        'Wrong email or password'
       );
     }
 

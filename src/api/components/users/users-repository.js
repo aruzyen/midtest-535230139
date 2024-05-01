@@ -1,6 +1,6 @@
 const { User } = require('../../../models');
 const usersRoute = require('./users-route');
-const LOCKED_LOGIN_DURATION = 5 * 60 * 1000; // 5 minutes
+const LOCKED_LOGIN_DURATION = 30 * 60 * 1000; // 30 minutes
 
 /**
  * Get a list of users
@@ -115,7 +115,7 @@ async function setLockUserLogin(id) {
 }
 
 /**
- * Enable the user to login again
+ * Enables the user to login again
  * @param {string} id - User ID
  * @returns {Promise}
  */
@@ -125,15 +125,6 @@ async function resetLockUserLogin(id) {
     { $set: { locked: false, lockedUntil: 0 } }
   );
 }
-
-// /**
-//  * Get the remaining time of user locked time from log in
-//  * @param {string} id - User ID
-//  * @returns {Promise}
-//  */
-// async function getLockUserLogin(id) {
-//   return User.findOne({ _id: id }, {});
-// }
 
 module.exports = {
   getUsers,
