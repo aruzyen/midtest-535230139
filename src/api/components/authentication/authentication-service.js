@@ -1,10 +1,10 @@
 const authenticationRepository = require('./authentication-repository');
 const usersRepository = require('../users/users-repository');
+const myLogger = require('../../../core/my-logger');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { toInteger } = require('lodash');
-const timestamp = new Date().toISOString();
 
 /**
  * Check username and password for login.
@@ -14,6 +14,7 @@ const timestamp = new Date().toISOString();
  */
 async function checkLoginCredentials(email, password) {
   const user = await authenticationRepository.getUserByEmail(email);
+  const currentTime = new Date().getTime();
 
   // We define default user password here as '<RANDOM_PASSWORD_FILTER>'
   // to handle the case when the user login is invalid. We still want to
@@ -22,6 +23,12 @@ async function checkLoginCredentials(email, password) {
   const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
   const passwordChecked = await passwordMatched(password, userPassword);
 
+  // Resets the locked in time when the time's over
+  if (currentTime > user.lockedUntil) {
+    await usersRepository.resetLockUserLogin(user.id);
+    myLogger.logTimesOver(email);
+  }
+
   // Because we always check the password (see above comment), we define the
   // login attempt as successful when the `user` is found (by email) and
   // the password matches.
@@ -29,6 +36,7 @@ async function checkLoginCredentials(email, password) {
     // Sets the user's login attempt to 0
     await usersRepository.resetLoginAttempt(user.id);
     await usersRepository.resetLockUserLogin(user.id);
+    myLogger.logSuccessLogin(email);
 
     return {
       email: user.email,
@@ -40,28 +48,18 @@ async function checkLoginCredentials(email, password) {
     await usersRepository.incrementLoginAttempt(user.id);
     await usersRepository.setLockUserLogin(user.id);
 
-    console.log(
-      `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m gagal login. Attempt=${user.loginAttempts}. Limit reached.`
-    );
+    myLogger.logFailAttempt(email);
 
     throw errorResponder(
       errorTypes.FORBIDDEN,
       'Too many failed login attempts.'
     );
   } else if ((user && user.loginAttempts > 5) || user.locked) {
-    console.log(
-      `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m mencoba login, namun mendapat error 403 karena telah melebihi limit attempt.`
-    );
+    myLogger.logFailLimit(email);
 
-    const currentTime = new Date().getTime();
-    console.log(`Current_Time: `, currentTime);
-    console.log(`Users_Locked_Time: `, user.lockedUntil);
     const remainingTime = toInteger(
       (user.lockedUntil - currentTime) / 60 / 1000
     );
-    console.log(`Remaining_Time: `, remainingTime, `minutes`);
-
-    console.log(`Account_Status: `, user.locked);
 
     throw errorResponder(
       errorTypes.FORBIDDEN,
@@ -69,13 +67,9 @@ async function checkLoginCredentials(email, password) {
     );
   } else if (user && !passwordChecked) {
     // Increment the user's login attempts value
-    const incremented = await usersRepository.incrementLoginAttempt(user.id);
+    await usersRepository.incrementLoginAttempt(user.id);
 
-    if (incremented) {
-      console.log(
-        `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m gagal login. Attempt=${user.loginAttempts}`
-      );
-    }
+    myLogger.logFailAttempt(email);
 
     return {
       code: 999,
