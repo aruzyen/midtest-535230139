@@ -1,6 +1,5 @@
 const joi = require('joi');
 const { joiPasswordExtendCore } = require('joi-password');
-const { loginAttempts } = require('../../../models/users-schema');
 const joiPassword = joi.extend(joiPasswordExtendCore);
 
 module.exports = {
