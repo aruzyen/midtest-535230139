@@ -3,6 +3,7 @@ const usersRepository = require('../users/users-repository');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
 const { errorResponder, errorTypes } = require('../../../core/errors');
+const { toInteger } = require('lodash');
 const timestamp = new Date().toISOString();
 
 /**
@@ -27,6 +28,7 @@ async function checkLoginCredentials(email, password) {
   if (user && passwordChecked) {
     // Sets the user's login attempt to 0
     await usersRepository.resetLoginAttempt(user.id);
+    await usersRepository.resetLockUserLogin(user.id);
 
     return {
       email: user.email,
@@ -46,12 +48,20 @@ async function checkLoginCredentials(email, password) {
       errorTypes.FORBIDDEN,
       'Too many failed login attempts.'
     );
-  } else if (user && user.loginAttempts > 5) {
+  } else if ((user && user.loginAttempts > 5) || user.locked) {
     console.log(
       `[${timestamp}] User \x1b[34;4m${user.email}\x1b[0m mencoba login, namun mendapat error 403 karena telah melebihi limit attempt.`
     );
-    const remainingTime =
-      usersRepository.LOCKED_LOGIN_DURATION - user.lockedTime;
+
+    const currentTime = new Date().getTime();
+    console.log(`Current_Time: `, currentTime);
+    console.log(`Users_Locked_Time: `, user.lockedUntil);
+    const remainingTime = toInteger(
+      (user.lockedUntil - currentTime) / 60 / 1000
+    );
+    console.log(`Remaining_Time: `, remainingTime, `minutes`);
+
+    console.log(`Account_Status: `, user.locked);
 
     throw errorResponder(
       errorTypes.FORBIDDEN,
@@ -69,6 +79,8 @@ async function checkLoginCredentials(email, password) {
 
     return {
       code: 999,
+      message: 'Wrong password or email',
+      attempt: user.loginAttempts,
     };
   }
 

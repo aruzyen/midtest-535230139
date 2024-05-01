@@ -3,7 +3,8 @@ const usersSchema = {
   email: String,
   password: String,
   loginAttempts: Number,
-  lockedTime: Number,
+  locked: Boolean,
+  lockedUntil: Number,
 };
 
 module.exports = usersSchema;
