@@ -98,7 +98,7 @@ async function incrementLoginAttempt(id) {
  * @returns {Promise}
  */
 async function resetLoginAttempt(id) {
-  return User.updateOne({ _id: id }, { $set: { loginAttempts: 4 } }); //JANGAN LUPA GANTI KE 1
+  return User.updateOne({ _id: id }, { $set: { loginAttempts: 0 } });
 }
 
 /**

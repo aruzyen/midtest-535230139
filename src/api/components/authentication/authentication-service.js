@@ -14,7 +14,10 @@ const { toInteger } = require('lodash');
  */
 async function checkLoginCredentials(email, password) {
   const user = await authenticationRepository.getUserByEmail(email);
+
+  // These variables are used to count user's locked out from logging in time
   const currentTime = new Date().getTime();
+  const remainingTime = toInteger((user.lockedUntil - currentTime) / 60 / 1000);
 
   // We define default user password here as '<RANDOM_PASSWORD_FILTER>'
   // to handle the case when the user login is invalid. We still want to
@@ -24,10 +27,19 @@ async function checkLoginCredentials(email, password) {
   const passwordChecked = await passwordMatched(password, userPassword);
 
   // Resets the locked in time when the time's over
-  if (currentTime > user.lockedUntil) {
+  if (user.locked && remainingTime <= 0) {
+    await usersRepository.resetLoginAttempt(user.id);
     await usersRepository.resetLockUserLogin(user.id);
     myLogger.logTimesOver(email);
+
+    return {
+      message: 'Passed the 30 minutes locked time. You can try to login again.',
+    };
   }
+
+  // Checking user status for debugging
+  let logStatus = false;
+  myLogger.logUserStatus(email, logStatus);
 
   // Because we always check the password (see above comment), we define the
   // login attempt as successful when the `user` is found (by email) and
@@ -38,43 +50,48 @@ async function checkLoginCredentials(email, password) {
     await usersRepository.resetLockUserLogin(user.id);
     myLogger.logSuccessLogin(email);
 
+    // Checking user status for debugging
+    let logStatus = true;
+    myLogger.logUserStatus(email, logStatus);
+
     return {
       email: user.email,
       name: user.name,
       user_id: user.id,
       token: generateToken(user.email, user.id),
     };
+
+    // Sets the locked timer when login attempts reached 5
+    // and increment it one more time to trigger another log message
   } else if (user && !passwordChecked && user.loginAttempts == 5) {
     await usersRepository.incrementLoginAttempt(user.id);
     await usersRepository.setLockUserLogin(user.id);
-
-    myLogger.logFailAttempt(email);
+    myLogger.logFailLogin(email);
 
     throw errorResponder(
       errorTypes.FORBIDDEN,
       'Too many failed login attempts.'
     );
-  } else if ((user && user.loginAttempts > 5) || user.locked) {
-    myLogger.logFailLimit(email);
 
-    const remainingTime = toInteger(
-      (user.lockedUntil - currentTime) / 60 / 1000
-    );
+    // Disabling login feature when login attempts > 5 or user locked status is true
+    // returning the remaining time to user
+  } else if ((user && user.loginAttempts > 5) || user.locked) {
+    myLogger.logFailLogin(email);
 
     throw errorResponder(
       errorTypes.FORBIDDEN,
       `Due to many failed login attempts. Please wait for ${remainingTime} minutes.`
     );
-  } else if (user && !passwordChecked) {
-    // Increment the user's login attempts value
-    await usersRepository.incrementLoginAttempt(user.id);
 
-    myLogger.logFailAttempt(email);
+    // Incrementing login attempt when user's password isn't valid
+  } else if (user && !passwordChecked) {
+    incremented = await usersRepository.incrementLoginAttempt(user.id);
+    myLogger.logFailLogin(email) ? incremented : 0;
 
     return {
       code: 999,
       message: 'Wrong password or email',
-      attempt: user.loginAttempts,
+      attempt: user.loginAttempts + 1,
     };
   }
 
