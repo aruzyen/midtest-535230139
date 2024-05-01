@@ -43,6 +43,6 @@ module.exports = (app) => {
     usersControllers.changePassword
   );
 
-  // Login
-  route.post('/login/', authenticationMiddleware, usersControllers.userLogin);
+  // // Login
+  // route.post('/login/', authenticationMiddleware, usersControllers.userLogin);
 };

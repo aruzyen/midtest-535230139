@@ -1,11 +1,7 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
-const { result, ceil } = require('lodash');
+const { ceil } = require('lodash');
 const { errorResponder, errorTypes } = require('../../../core/errors');
-const { loginAttempts } = require('../../../models/users-schema');
-
-const MAX_LOGIN_ATTEMPTS = 5; // Limits users login attempts to 5
-const LOCKED_LOGIN_DUR = 30 * 1000; // Sets the locked duration to 30 minutes
 
 /**
  * Sort the list of users
@@ -265,37 +261,6 @@ async function changePassword(userId, password) {
   return true;
 }
 
-/**
- * Logging in user into the app
- * @param {string} email - User email
- * @param {string} password - Password
- * @returns {boolean}
- */
-async function userLogin(email, password) {
-  let user = await usersRepository.getUserByEmail(email);
-  // user.loginAttempts = 0;
-  // user.lockedStatus = false;
-  // Check if user not found
-  if (!user) {
-    return null;
-  }
-
-  if (user.loginAttempts < MAX_LOGIN_ATTEMPTS) {
-    if (user.password === password) {
-      user.loginAttempts = 0;
-      user.lockedStatus = false;
-      return true;
-    }
-    user.loginAttempts += 1;
-  }
-
-  return {
-    code: 12345,
-    attempts: user.loginAttempts,
-    locked_status: user.lockedStatus,
-  };
-}
-
 module.exports = {
   getUsers,
   getUser,
@@ -305,5 +270,4 @@ module.exports = {
   emailIsRegistered,
   checkPassword,
   changePassword,
-  userLogin,
 };

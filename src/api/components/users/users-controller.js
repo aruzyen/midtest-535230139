@@ -4,8 +4,6 @@ const {
   errorTypes,
   errorHandler,
 } = require('../../../core/errors');
-const { attempt } = require('lodash');
-const { loginAttempts } = require('../../../models/users-schema');
 
 /**
  * Handle get list of users request
@@ -200,19 +198,6 @@ async function changePassword(request, response, next) {
   }
 }
 
-async function userLogin(request, response, next) {
-  try {
-    const email = request.body.email;
-    const password = request.body.password;
-
-    const loginStatus = await usersService.userLogin(email, password);
-    return response.status(200).json({
-      loginStatus,
-    });
-  } catch (error) {
-    return next(error);
-  }
-}
 module.exports = {
   getUsers,
   getUser,
@@ -220,5 +205,4 @@ module.exports = {
   updateUser,
   deleteUser,
   changePassword,
-  userLogin,
 };
