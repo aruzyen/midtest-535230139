@@ -1,4 +1,5 @@
 const authenticationRepository = require('./authentication-repository');
+const usersRepository = require('../users/users-repository');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
 
@@ -28,8 +29,14 @@ async function checkLoginCredentials(email, password) {
       user_id: user.id,
       token: generateToken(user.email, user.id),
     };
+  } else if (user && !passwordChecked) {
+    const loginAttempt = await usersRepository.incrementLoginAttempt(user.id);
+    console.log('Login_Attempt:', loginAttempt);
+    console.log('Login Attempt ZZZ:', user.loginAttempt);
+    return {
+      code: 999,
+    };
   }
-
   return null;
 }
 

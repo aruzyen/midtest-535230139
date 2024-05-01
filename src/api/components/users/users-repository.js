@@ -1,4 +1,5 @@
 const { User } = require('../../../models');
+const usersRoute = require('./users-route');
 
 /**
  * Get a list of users
@@ -81,6 +82,24 @@ async function changePassword(id, password) {
   return User.updateOne({ _id: id }, { $set: { password } });
 }
 
+/**
+ * Increments the login attempt value
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
+async function incrementLoginAttempt(id) {
+  return User.updateOne({ _id: id }, { $inc: { loginAttempts: 1 } });
+}
+
+/**
+ * Reset or set the user's login attempt to zero
+ * @param {string} id - User ID
+ * @returns {Promise}
+ */
+async function resetLoginAttempt(id) {
+  return User.updateOne({ _id: id }, { $set: { loginAttempts: 0 } });
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -89,4 +108,6 @@ module.exports = {
   deleteUser,
   getUserByEmail,
   changePassword,
+  incrementLoginAttempt,
+  resetLoginAttempt,
 };
