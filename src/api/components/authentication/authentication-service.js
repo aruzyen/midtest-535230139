@@ -15,6 +15,8 @@ const { toInteger } = require('lodash');
 async function checkLoginCredentials(email, password) {
   const user = await authenticationRepository.getUserByEmail(email);
 
+  // Tambahin base case biar reset 0
+
   // Immediately return null if user not detected to avoid errors
   if (!user) {
     return null;

@@ -10,7 +10,7 @@ const route = express.Router();
 module.exports = (app) => {
   app.use('/products', route);
 
-  // Get list of users
+  // Get list of products
   route.get('/', authenticationMiddleware, productsController.getProducts);
 
   // Input product to the list
@@ -18,7 +18,7 @@ module.exports = (app) => {
     '/',
     authenticationMiddleware,
     celebrate(productsValidator.inputProduct),
-    usersControllers.inputProduct
+    productsControllers.inputProduct
   );
 
   // Get product detail
