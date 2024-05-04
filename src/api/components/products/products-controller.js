@@ -42,7 +42,7 @@ async function getProduct(request, response, next) {
   }
 }
 
-async function inputProduct(request, response, next) {
+async function insertProduct(request, response, next) {
   // HARUSNYA DONE
   try {
     const name = request.body.name;
@@ -50,7 +50,7 @@ async function inputProduct(request, response, next) {
     const price = request.body.price;
     const stock = request.body.stock;
 
-    const success = await productsService.inputProduct(
+    const success = await productsService.insertProduct(
       name,
       category,
       price,
@@ -69,43 +69,67 @@ async function inputProduct(request, response, next) {
   }
 }
 
-async function updateProductPrice(request, response, next) {
-  // HARUSNYA DONE
+async function updateProduct(request, response, next) {
   try {
     const productId = request.params.id;
     const price = request.params.price;
-
-    const success = await productsService.updateProductPrice(productId, price);
-    if (!success) {
-      throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to update product price'
-      );
-    }
-
-    return response.status(200).json({ id, price });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-async function updateProductStock(request, repsonse, next) {
-  try {
-    const productId = request.params.id;
     const stock = request.params.stock;
 
-    const success = await productsService.updateProductStock(productId, stock);
+    const success = await productsService.updateProduct(
+      productId,
+      price,
+      stock
+    );
     if (!success) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to update product stock'
+        'Failed to update product detail'
       );
     }
-    return response.status(200).json({ id, stock });
+
+    return response.status(200).json({ id, price, stock });
   } catch (error) {
     return next(error);
   }
 }
+
+// async function updateProductPrice(request, response, next) {
+//   // HARUSNYA DONE
+//   try {
+//     const productId = request.params.id;
+//     const price = request.params.price;
+
+//     const success = await productsService.updateProductPrice(productId, price);
+//     if (!success) {
+//       throw errorResponder(
+//         errorTypes.UNPROCESSABLE_ENTITY,
+//         'Failed to update product price'
+//       );
+//     }
+
+//     return response.status(200).json({ id, price });
+//   } catch (error) {
+//     return next(error);
+//   }
+// }
+
+// async function updateProductStock(request, repsonse, next) {
+//   try {
+//     const productId = request.params.id;
+//     const stock = request.params.stock;
+
+//     const success = await productsService.updateProductStock(productId, stock);
+//     if (!success) {
+//       throw errorResponder(
+//         errorTypes.UNPROCESSABLE_ENTITY,
+//         'Failed to update product stock'
+//       );
+//     }
+//     return response.status(200).json({ id, stock });
+//   } catch (error) {
+//     return next(error);
+//   }
+// }
 
 async function deleteProduct(request, response, next) {
   try {
@@ -128,8 +152,7 @@ async function deleteProduct(request, response, next) {
 module.exports = {
   getProducts,
   getProduct,
-  inputProduct,
-  updateProductPrice,
-  updateProductStock,
+  insertProduct,
+  updateProduct,
   deleteProduct,
 };

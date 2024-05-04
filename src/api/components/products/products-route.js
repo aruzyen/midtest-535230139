@@ -13,12 +13,12 @@ module.exports = (app) => {
   // Get list of products
   route.get('/', authenticationMiddleware, productsController.getProducts);
 
-  // Input product to the list
+  // Insert product to the list
   route.post(
     '/',
     authenticationMiddleware,
-    celebrate(productsValidator.inputProduct),
-    productsControllers.inputProduct
+    celebrate(productsValidator.insertProduct),
+    productsController.insertProduct
   );
 
   // Get product detail
@@ -28,7 +28,7 @@ module.exports = (app) => {
   route.put(
     '/:id',
     authenticationMiddleware,
-    celebrate(productsController.updateProduct),
+    celebrate(productsValidator.updateProduct),
     productsController.updateProduct
   );
 
@@ -36,6 +36,6 @@ module.exports = (app) => {
   route.delete(
     '/:id',
     authenticationMiddleware,
-    productsControllers.deleteProduct
+    productsController.deleteProduct
   );
 };
