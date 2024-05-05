@@ -93,10 +93,43 @@ async function deleteProduct(productId) {
   return Product.deleteOne({ _id: productId });
 }
 
+/**
+ * Sort the list of products
+ * @param {Object} products - The list of products
+ * @param {String} field - Field to be sorted
+ * @param {String} order - Order of sort (asc or desc)
+ */
+function sortProducts(products, sort) {
+  const [field, order] = sort.split(':'); // Split the parameters
+  return products.sort((a, b) => {
+    if (order == 'asc') {
+      return a[field] > b[field] ? 1 : -1;
+    } else if (order == 'desc') {
+      return a[field] < b[field] ? 1 : -1;
+    }
+    return 0;
+  });
+}
+
+/**
+ * Search something from the list of products
+ * @param {Object} products - The list of products
+ * @param {String} field - Field to be searched
+ * @param {String} key   - What to search in the field
+ */
+function searchProducts(products, search) {
+  const [field, key] = search.split(':'); // Split the parameters
+  return products.filter((product) =>
+    product[field].toLowerCase().includes(key.toLowerCase())
+  );
+}
+
 module.exports = {
   getProducts,
   getProduct,
   insertProduct,
   updateProduct,
   deleteProduct,
+  sortProducts,
+  searchProducts,
 };

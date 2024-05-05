@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-a;
+
 const config = require('../core/config');
 const logger = require('../core/logger')('app');
 
