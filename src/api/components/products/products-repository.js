@@ -1,5 +1,6 @@
 const { Product } = require('../../../models');
 const productsRoute = require('./products-route');
+const mongoose = require('mongoose');
 
 /**
  * Get a list of products

@@ -1,5 +1,4 @@
 const authenticationRepository = require('./authentication-repository');
-const usersRepository = require('../users/users-repository');
 const myLogger = require('../../../core/my-logger');
 const { generateToken } = require('../../../utils/session-token');
 const { passwordMatched } = require('../../../utils/password');
@@ -35,8 +34,8 @@ async function checkLoginCredentials(email, password) {
 
   // Resets the locked in time when the time's over
   if (user.locked && remainingTime <= 0) {
-    await usersRepository.resetLoginAttempt(user.id);
-    await usersRepository.resetLockUserLogin(user.id);
+    await authenticationRepository.resetLoginAttempt(user.id);
+    await authenticationRepository.resetLockUserLogin(user.id);
     myLogger.logTimesOver(email);
 
     return {
@@ -53,12 +52,12 @@ async function checkLoginCredentials(email, password) {
   // the password matches.
   if (user && passwordChecked) {
     // Sets the user's login attempt to 0
-    await usersRepository.resetLoginAttempt(user.id);
-    await usersRepository.resetLockUserLogin(user.id);
+    await authenticationRepository.resetLoginAttempt(user.id);
+    await authenticationRepository.resetLockUserLogin(user.id);
     myLogger.logSuccessLogin(email);
 
-    // Checking user status for debugging
-    let logStatus = true;
+    // // Checking user status for debugging
+    // let logStatus = true;
     myLogger.logUserStatus(email, logStatus);
 
     return {
@@ -71,8 +70,8 @@ async function checkLoginCredentials(email, password) {
     // Sets the locked timer when login attempts reached 5
     // and increment it one more time to trigger another log message
   } else if (user && !passwordChecked && user.loginAttempts == 5) {
-    await usersRepository.incrementLoginAttempt(user.id);
-    await usersRepository.setLockUserLogin(user.id);
+    await authenticationRepository.incrementLoginAttempt(user.id);
+    await authenticationRepository.setLockUserLogin(user.id);
     myLogger.logFailLogin(email);
 
     throw errorResponder(
@@ -92,7 +91,7 @@ async function checkLoginCredentials(email, password) {
 
     // Incrementing login attempt when user's password isn't valid
   } else if (user && !passwordChecked) {
-    incremented = await usersRepository.incrementLoginAttempt(user.id);
+    incremented = await authenticationRepository.incrementLoginAttempt(user.id);
     myLogger.logFailLogin(email) ? incremented : 0;
 
     throw errorResponder(

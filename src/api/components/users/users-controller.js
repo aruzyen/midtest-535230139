@@ -1,9 +1,5 @@
 const usersService = require('./users-service');
-const {
-  errorResponder,
-  errorTypes,
-  errorHandler,
-} = require('../../../core/errors');
+const { errorResponder, errorTypes } = require('../../../core/errors');
 
 /**
  * Handle get list of users request
@@ -14,8 +10,8 @@ const {
  */
 async function getUsers(request, response, next) {
   try {
-    const number = parseInt(request.query.page_number) || null;
-    const size = parseInt(request.query.page_size) || null;
+    const number = parseInt(request.query.page_number);
+    const size = parseInt(request.query.page_size);
     const sort = request.query.sort;
     const search = request.query.search;
 

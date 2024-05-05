@@ -1,12 +1,10 @@
 const { User } = require('../../../models');
-const usersRoute = require('./users-route');
-const LOCKED_LOGIN_DURATION = 30 * 60 * 1000; // 30 minutes
 
 /**
  * Get a list of users
  * @returns {Promise}
  */
-async function getUsers(number, size, sort, search) {
+async function getUsers() {
   return User.find({});
 }
 
@@ -83,49 +81,6 @@ async function changePassword(id, password) {
   return User.updateOne({ _id: id }, { $set: { password } });
 }
 
-/**
- * Increments the login attempt value
- * @param {string} id - User ID
- * @returns {Promise}
- */
-async function incrementLoginAttempt(id) {
-  return User.updateOne({ _id: id }, { $inc: { loginAttempts: 1 } });
-}
-
-/**
- * Reset or set the user's login attempt to zero
- * @param {string} id - User ID
- * @returns {Promise}
- */
-async function resetLoginAttempt(id) {
-  return User.updateOne({ _id: id }, { $set: { loginAttempts: 0 } });
-}
-
-/**
- * Disabling the user to login because of too many login attempts
- * @param {string} id - User ID
- * @returns {Promise}
- */
-async function setLockUserLogin(id) {
-  const lockedTime = new Date().getTime() + LOCKED_LOGIN_DURATION;
-  return User.updateOne(
-    { _id: id },
-    { $set: { locked: true, lockedUntil: lockedTime } }
-  );
-}
-
-/**
- * Enables the user to login again
- * @param {string} id - User ID
- * @returns {Promise}
- */
-async function resetLockUserLogin(id) {
-  return User.updateOne(
-    { _id: id },
-    { $set: { locked: false, lockedUntil: 0 } }
-  );
-}
-
 module.exports = {
   getUsers,
   getUser,
@@ -134,8 +89,4 @@ module.exports = {
   deleteUser,
   getUserByEmail,
   changePassword,
-  incrementLoginAttempt,
-  resetLoginAttempt,
-  setLockUserLogin,
-  resetLockUserLogin,
 };
