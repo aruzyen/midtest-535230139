@@ -22,20 +22,15 @@ module.exports = (app) => {
   );
 
   // Get product detail
-  route.get('/:id', authenticationMiddleware, productsController.getProduct);
+  route.get('/:id', productsController.getProduct);
 
   // Update the product information
   route.put(
     '/:id',
-    authenticationMiddleware,
     celebrate(productsValidator.updateProduct),
     productsController.updateProduct
   );
 
   // Delete product from the list
-  route.delete(
-    '/:id',
-    authenticationMiddleware,
-    productsController.deleteProduct
-  );
+  route.delete('/:id', productsController.deleteProduct);
 };
