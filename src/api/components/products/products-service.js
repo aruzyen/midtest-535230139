@@ -1,5 +1,4 @@
 const productsRepository = require('./products-repository');
-const usersRepository = require('../users/users-repository');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { ceil } = require('lodash');
 

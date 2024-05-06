@@ -5,6 +5,13 @@ const {
   errorHandler,
 } = require('../../../core/errors');
 
+/**
+ * Get list of products
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function getProducts(request, response, next) {
   try {
     const number = parseInt(request.query.page_number) || null;
@@ -24,6 +31,13 @@ async function getProducts(request, response, next) {
   }
 }
 
+/**
+ * Get product detail
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function getProduct(request, response, next) {
   try {
     const product = await productsService.getProducts(request.params.id);
@@ -38,6 +52,13 @@ async function getProduct(request, response, next) {
   }
 }
 
+/**
+ * Create new product
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function insertProduct(request, response, next) {
   try {
     const name = request.body.name;
@@ -64,6 +85,13 @@ async function insertProduct(request, response, next) {
   }
 }
 
+/**
+ * Update existing product
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function updateProduct(request, response, next) {
   try {
     const productId = request.params.id;
@@ -94,6 +122,13 @@ async function updateProduct(request, response, next) {
   }
 }
 
+/**
+ * Delete product from the list
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function deleteProduct(request, response, next) {
   try {
     const productId = request.params.id;

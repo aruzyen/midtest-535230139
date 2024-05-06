@@ -1,6 +1,4 @@
 const { Product } = require('../../../models');
-const productsRoute = require('./products-route');
-const mongoose = require('mongoose');
 
 /**
  * Get a list of products
@@ -49,43 +47,6 @@ async function updateProduct(productId, name, category, price, stock) {
     { $set: { name, category, price, stock } }
   );
 }
-// /**
-//  * Update existing product's price
-//  * @param {string} productId - Product ID
-//  * @param {string} price - New price of product (in IDR)
-//  * @returns {Promise}
-//  */
-// async function updateProductPrice(productId, price) {
-//   return Product.updateOne(
-//     {
-//       _id: productId,
-//     },
-//     {
-//       $set: {
-//         price,
-//       },
-//     }
-//   );
-// }
-
-// /**
-//  * Update existing product's stock
-//  * @param {string} productId - Product ID
-//  * @param {string} stock - New stock of product
-//  * @returns {Promise}
-//  */
-// async function updateProductStock(productId, stock) {
-//   return Product.updateOne(
-//     {
-//       _id: productId,
-//     },
-//     {
-//       $set: {
-//         stock,
-//       },
-//     }
-//   );
-// }
 
 /**
  * Delete a product
