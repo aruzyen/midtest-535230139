@@ -59,7 +59,6 @@ async function getUsers(number, size, sort, search) {
         id: user.id,
         name: user.name,
         email: user.email,
-        password: user.password,
       });
     }
     return results;

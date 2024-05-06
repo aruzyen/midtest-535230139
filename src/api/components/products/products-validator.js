@@ -13,8 +13,8 @@ module.exports = {
 
   updateProduct: {
     body: {
-      name: joi.string().min(1).max(100).required().label('Name'),
-      category: joi.string().required().label('Category'),
+      name: joi.string().min(1).max(100).label('Name'),
+      category: joi.string().label('Category'),
       price: joi.number().label('Price'),
       stock: joi.number().label('Stock available'),
       forSale: joi.boolean().label('For Sale'),

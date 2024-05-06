@@ -43,8 +43,11 @@ async function insertProduct(name, category, price, stock) {
  * @param {Number} stock - New stock of stock
  * @returns {Promise}
  */
-async function updateProduct(productId, price, stock) {
-  return Product.updateOne({ _id: productId }, { $set: { price, stock } });
+async function updateProduct(productId, name, category, price, stock) {
+  return Product.updateOne(
+    { _id: productId },
+    { $set: { name, category, price, stock } }
+  );
 }
 // /**
 //  * Update existing product's price

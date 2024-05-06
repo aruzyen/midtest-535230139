@@ -1,37 +1,47 @@
-const productsRepository = require('./products-repository');
+const productsRepository = require('../products/products-repository');
+const cartsRepository = require('./carts-repository');
 const usersRepository = require('../users/users-repository');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { ceil } = require('lodash');
 
 /**
- * Get list of products
+ * Get list of products in user's shopping cart
  * @param {Number} number - Number of current page out of all the pages available
  * @param {Number} size - Size of current page
  * @param {Object} sort - Sort data of products by category/price/name/stock (ascending by default)
  * @param {Object} search - Search data of products by category/price/name/stock
- * @returns {Array}
+ * @returns {Object}
  */
-async function getProducts(number, size, sort, search) {
-  let products = await productsRepository.getProducts();
+async function getCartsProducts(email, number, size, sort, search) {
+  const user = await usersRepository.getUserByEmail(email);
+  let productsInCart = await cartsRepository.getCartsProducts();
   const results = [];
 
   // Using ternary operators to search and sort function
   // (if search and/or sort are queried)
-  search && (products = productsRepository.searchProducts(products, search));
-  sort && (products = productsRepository.sortProducts(products, sort));
+  search &&
+    (productsInCart = productsRepository.searchProducts(
+      productsInCart,
+      search
+    ));
+  sort &&
+    (productsInCart = productsRepository.sortProducts(productsInCart, sort));
 
   if (!number && !size) {
-    for (let i = 0; i < products.length; i += 1) {
-      const product = products[i];
+    for (let i = 0; i < productsInCart.length; i += 1) {
+      const product = productsInCart[i];
       results.push({
         id: product.id,
         name: product.name,
         category: product.category,
         price: product.price,
-        stock: product.stock,
+        quantity: product.quantity,
       });
     }
-    return results;
+    return {
+      title: `${user.name}'s Shopping Cart`,
+      data: results,
+    };
   }
 
   // Throw error when one of the page_size or page_number is not queried
@@ -44,7 +54,7 @@ async function getProducts(number, size, sort, search) {
 
   // If the page_number and page_size are queried
   else {
-    const limit = ceil(products.length / size);
+    const limit = ceil(productsInCart.length / size);
     if (number > limit) {
       throw errorResponder(
         errorTypes.UNPROCESSABLE_ENTITY,
@@ -64,10 +74,10 @@ async function getProducts(number, size, sort, search) {
 
     const shift = (number - 1) * size;
     for (let i = shift; i < size + shift; i += 1) {
-      const product = products[i];
+      const product = productsInCart[i];
 
       // Get out of the operation when the variable i exceeds the products length (null or NaN)
-      if (products[i] == null || products[i] == NaN) {
+      if (productsInCart[i] == null || productsInCart[i] == NaN) {
         break;
       }
 
@@ -77,14 +87,15 @@ async function getProducts(number, size, sort, search) {
         name: product.name,
         category: product.category,
         price: product.price,
-        stock: product.stock,
+        quantity: product.quantity,
       });
     }
 
     return {
+      title: `${user.name}'s Shopping Cart`,
       page_number: number,
       page_size: size,
-      count: products.length,
+      items_in_cart: productsInCart.length,
       total_pages: limit,
       has_previous_page: hasPrevPage(number, limit),
       has_next_page: hasNextPage(number, limit),
@@ -94,12 +105,12 @@ async function getProducts(number, size, sort, search) {
 }
 
 /**
- * Get product detail
- * @param {string} productId - Product ID
+ * Get product detail in user's shopping cart
+ * @param {string} productId
  * @returns {Object}
  */
-async function getProduct(productId) {
-  const product = await productsRepository.getproduct(productId);
+async function getCartProduct(productId) {
+  const product = await cartsRepository.getCartProduct(productId);
 
   // Product not found
   if (!product) {
@@ -111,21 +122,26 @@ async function getProduct(productId) {
     name: product.name,
     category: product.category,
     price: product.price,
-    stock: product.stock,
+    quantity: product.quantity,
   };
 }
 
 /**
- * Create new product
- * @param {string} name - Product Name
- * @param {string} category - Product Category
- * @param {Number} price - Product's Price
- * @param {Number} stock - Stock Available
+ * Adds a product to user's shopping cart
+ * @param {string} productId
+ * @param {Number} quantity
  * @returns {boolean}
  */
-async function insertProduct(name, category, price, stock) {
+async function addProductToCart(productId, quantity) {
+  const product = await productsRepository.getProduct(productId);
+
+  // Product not found
+  if (!product) {
+    return null;
+  }
+
   try {
-    await productsRepository.insertProduct(name, category, price, stock);
+    await cartsRepository.addProductToCart(productId, quantity);
   } catch (err) {
     return null;
   }
@@ -134,14 +150,13 @@ async function insertProduct(name, category, price, stock) {
 }
 
 /**
- * Update existing product
- * @param {string} productId - Product ID
- * @param {Number} price - New Product Price
- * @param {Number} stock - New Product Stock
+ * Update the quantity from product in user's shopping cart
+ * @param {string} productId
+ * @param {Number} quantity
  * @returns {boolean}
  */
-async function updateProduct(productId, name, category, price, stock) {
-  const product = await productsRepository.getProduct(productId);
+async function updateProductInCart(productId, quantity) {
+  const product = await cartsRepository.getCartProduct(productId);
 
   // Product not found
   if (!product) {
@@ -149,14 +164,8 @@ async function updateProduct(productId, name, category, price, stock) {
   }
 
   try {
-    await productsRepository.updateProduct(
-      productId,
-      name,
-      category,
-      price,
-      stock
-    );
-  } catch (error) {
+    await cartsRepository.updateProductInCart(productId, quantity);
+  } catch (err) {
     return null;
   }
 
@@ -164,20 +173,19 @@ async function updateProduct(productId, name, category, price, stock) {
 }
 
 /**
- * Delete product from the list
- * @param {string} productId - Product ID
- * @returns {boolean}
+ * Remove product from user's shopping cart
+ * @param {string} productId
+ * @returns
  */
-async function deleteProduct(productId) {
-  const product = await productsRepository.getProduct(productId);
+async function removeProductFromCart(productId) {
+  const product = await cartsRepository.getCartProduct(productId);
 
-  // Product not found
   if (!product) {
     return null;
   }
 
   try {
-    await productsRepository.deleteProduct(productId);
+    await cartsRepository.removeProductFromCart(productId);
   } catch (err) {
     return null;
   }
@@ -186,9 +194,9 @@ async function deleteProduct(productId) {
 }
 
 module.exports = {
-  getProducts,
-  getProduct,
-  insertProduct,
-  updateProduct,
-  deleteProduct,
+  getCartsProducts,
+  getCartProduct,
+  addProductToCart,
+  updateProductInCart,
+  removeProductFromCart,
 };
