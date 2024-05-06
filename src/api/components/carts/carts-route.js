@@ -4,7 +4,6 @@ const authenticationMiddleware = require('../../middlewares/authentication-middl
 const celebrate = require('../../../core/celebrate-wrappers');
 const cartsController = require('./carts-controller');
 const cartsValidator = require('./carts-validator');
-const productsController = require('../products/products-controller');
 
 const route = express.Router();
 

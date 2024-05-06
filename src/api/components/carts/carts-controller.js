@@ -1,12 +1,17 @@
 const cartsService = require('./carts-service');
-const productsRepository = require('../products/products-repository');
-
 const {
   errorResponder,
   errorTypes,
   errorHandler,
 } = require('../../../core/errors');
 
+/**
+ * Get a list of products in user's shopping cart
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function getCartsProducts(request, response, next) {
   try {
     const email = request.query.email;
@@ -28,6 +33,13 @@ async function getCartsProducts(request, response, next) {
   }
 }
 
+/**
+ * Get product detail in user's shopping cart
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function getCartProduct(request, response, next) {
   try {
     const product = await cartsService.getCartProduct(request.params.id);
@@ -42,6 +54,13 @@ async function getCartProduct(request, response, next) {
   }
 }
 
+/**
+ * Adds a product to user's shopping cart
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function addProductToCart(request, response, next) {
   try {
     const productId = request.params.id;
@@ -61,6 +80,13 @@ async function addProductToCart(request, response, next) {
   }
 }
 
+/**
+ * Update the quantity from product in user's shopping cart
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function updateProductInCart(request, response, next) {
   try {
     const productId = request.params.id;
@@ -80,6 +106,13 @@ async function updateProductInCart(request, response, next) {
   }
 }
 
+/**
+ * Remove product from user's shopping cart
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
 async function removeProductFromCart(request, response, next) {
   try {
     const productId = request.params.id;
